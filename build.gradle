@@ -74,7 +74,7 @@ dependencies {
     compile 'de.uni-passau.fim.seibt:kvconfig:1.0'
     compile project(':JNativeMerge')
     compile files('lib/extendj.jar')
-    testCompile 'junit:junit:4.12'
+    compile 'junit:junit:4.12'
 }
 
 task wrapper(type: Wrapper) {
@@ -162,6 +162,19 @@ installDist {
 
     if (project.hasProperty('distDir')) {
         destinationDir = file(project.property('distDir'))
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'de.fosd.jdime.Main'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
     }
 }
 
