@@ -25,6 +25,9 @@ package de.fosd.jdime.stats;
 
 import java.util.concurrent.TimeUnit;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+
 /**
  * A measured runtime.
  */
@@ -76,6 +79,24 @@ public final class Runtime {
         @Override
         public void close() {
             stop();
+        }
+    }
+
+    public final static class CPUTimer {
+        private static final ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+        private static long sum = 0;
+        private static long stamp = 0;
+        
+        public static void start() {
+            stamp = bean.getCurrentThreadCpuTime();
+        }
+
+        public static void stop() {
+            sum += bean.getCurrentThreadCpuTime() - stamp;
+        }
+
+        public static long get() {
+            return sum;
         }
     }
 

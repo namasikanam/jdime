@@ -37,6 +37,7 @@ import de.fosd.jdime.matcher.matching.Matching;
 import de.fosd.jdime.operations.AddOperation;
 import de.fosd.jdime.operations.ConflictOperation;
 import de.fosd.jdime.operations.MergeOperation;
+import de.fosd.jdime.stats.Runtime;
 
 import static de.fosd.jdime.artifact.Artifacts.root;
 import static de.fosd.jdime.strdump.DumpMode.PLAINTEXT_TREE;
@@ -78,6 +79,8 @@ public class Merge<T extends Artifact<T>> implements MergeInterface<T> {
         Matching<T> m;
 
         if (!left.hasMatching(r) && !right.hasMatching(l)) {
+            Runtime.CPUTimer.start();
+
             if (!base.isEmpty()) {
                 // 3-way merge
 
@@ -101,6 +104,8 @@ public class Merge<T extends Artifact<T>> implements MergeInterface<T> {
             // diff left right
             matcher = new Matcher<>(matcher, left, right);
             m = matcher.match(context, Color.BLUE).get(left, right).get();
+
+            Runtime.CPUTimer.stop();
 
             if (context.isDiffOnly() && left.isRoot() && left instanceof ASTNodeArtifact) {
                 assert (right.isRoot());

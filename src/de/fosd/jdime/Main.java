@@ -51,6 +51,7 @@ import de.fosd.jdime.stats.KeyEnums;
 import de.fosd.jdime.stats.Statistics;
 import de.fosd.jdime.strategy.MergeStrategy;
 import de.fosd.jdime.strdump.DumpMode;
+import de.fosd.jdime.stats.Runtime;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
@@ -59,6 +60,9 @@ import static de.fosd.jdime.config.CommandLineConfigSource.CLI_HELP;
 import static de.fosd.jdime.config.CommandLineConfigSource.CLI_MODE;
 import static de.fosd.jdime.config.CommandLineConfigSource.CLI_VERSION;
 import static de.fosd.jdime.config.JDimeConfig.*;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 
 /**
  * Contains the main method of the application.
@@ -443,7 +447,15 @@ public final class Main {
         boolean conditional = context.isConditionalMerge();
         MergeOperation<FileArtifact> merge = new MergeOperation<>(inFiles, outFile, conditional);
 
+        ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+        long startCPUTime = bean.getCurrentThreadCpuTime();
+
         merge.apply(context);
+
+        long totalCPUTime = bean.getCurrentThreadCpuTime() - startCPUTime;
+        long matcherCPUTime = Runtime.CPUTimer.get();
+        LOG.config("[CPU time of matcher] " + Double.toString((double)matcherCPUTime / 1e9));
+        LOG.config("[CPU time of merger] " + Double.toString((double)(totalCPUTime - matcherCPUTime)/ 1e9));
     }
 
     /**
